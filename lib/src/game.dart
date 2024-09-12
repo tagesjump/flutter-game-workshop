@@ -23,6 +23,9 @@ class MyGame extends Forge2DGame with KeyboardEvents {
 
   static const _worldScale = .5;
 
+  final List<String> _maps = ['level1.tmx', 'level2.tmx'];
+  int _level = 0;
+
   @override
   Future<void> onLoad() async {
     sprites = GameSprites(this);
@@ -32,7 +35,7 @@ class MyGame extends Forge2DGame with KeyboardEvents {
 
     camera.viewport.add(FpsTextComponent());
 
-    mapComponent = await TiledComponent.load('level1.tmx', Vector2.all(18.0), prefix: 'assets/maps/');
+    mapComponent = await TiledComponent.load(_maps[_level], Vector2.all(18.0), prefix: 'assets/maps/');
     mapComponent.scale = Vector2.all(_worldScale);
 
     world.add(mapComponent);
@@ -106,10 +109,20 @@ class MyGame extends Forge2DGame with KeyboardEvents {
           player.moveLeft();
           isHandled = true;
         }
+
+        if (keysPressed.contains(LogicalKeyboardKey.arrowDown)) {
+          player.moveDown();
+          isHandled = true;
+        }
       case KeyUpEvent():
         if (!keysPressed.contains(LogicalKeyboardKey.arrowLeft) &&
             !keysPressed.contains(LogicalKeyboardKey.arrowRight)) {
           player.moveXStop();
+          isHandled = true;
+        }
+
+        if (!keysPressed.contains(LogicalKeyboardKey.arrowUp) && !keysPressed.contains(LogicalKeyboardKey.arrowDown)) {
+          player.moveYStop();
           isHandled = true;
         }
     }
@@ -121,11 +134,21 @@ class MyGame extends Forge2DGame with KeyboardEvents {
     return KeyEventResult.ignored;
   }
 
-  void gameOver() {
-    // TODO: game over :(
+  void gameOver() async {
+    pauseEngine();
+    world.removeWhere((_) => true);
+    await onLoad();
+    resumeEngine();
   }
 
-  void win() {
-    // TODO: win! change level
+  void win() async {
+    pauseEngine();
+    world.removeWhere((_) => true);
+    _level++;
+    if (_level + 1 > _maps.length) {
+      _level = 0;
+    }
+    await onLoad();
+    resumeEngine();
   }
 }
