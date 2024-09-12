@@ -2,6 +2,8 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flame_tiled/flame_tiled.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:v2/src/bodies/flag.dart';
 import 'package:v2/src/bodies/ground.dart';
 import 'package:v2/src/bodies/item.dart';
@@ -17,6 +19,7 @@ class MyGame extends Forge2DGame with KeyboardEvents {
   late GameSprites sprites;
 
   late TiledComponent mapComponent;
+  late Player player;
 
   static const _worldScale = .5;
 
@@ -72,11 +75,50 @@ class MyGame extends Forge2DGame with KeyboardEvents {
           String() => null,
         };
 
+        if (component is Player) {
+          player = component;
+        }
+
         if (component != null) {
           world.add(component);
         }
       }
     }
+  }
+
+  @override
+  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    bool isHandled = false;
+
+    switch (event) {
+      case KeyDownEvent() || KeyRepeatEvent():
+        if (keysPressed.contains(LogicalKeyboardKey.arrowUp)) {
+          player.moveUp();
+          isHandled = true;
+        }
+
+        if (keysPressed.contains(LogicalKeyboardKey.arrowRight)) {
+          player.moveRight();
+          isHandled = true;
+        }
+
+        if (keysPressed.contains(LogicalKeyboardKey.arrowLeft)) {
+          player.moveLeft();
+          isHandled = true;
+        }
+      case KeyUpEvent():
+        if (!keysPressed.contains(LogicalKeyboardKey.arrowLeft) &&
+            !keysPressed.contains(LogicalKeyboardKey.arrowRight)) {
+          player.moveXStop();
+          isHandled = true;
+        }
+    }
+
+    if (isHandled) {
+      return KeyEventResult.handled;
+    }
+
+    return KeyEventResult.ignored;
   }
 
   void gameOver() {
