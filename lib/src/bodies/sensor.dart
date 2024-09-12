@@ -18,4 +18,8 @@ enum ContactType {
 /// Например:
 /// - вода или шипы - игрок проигрывает при контакте
 /// - лестница - игрок может по ней карабкаться
-// TODO SensorBodyComponent
+class Sensor extends BaseBody {
+  Sensor({required super.position, super.size, super.polygon, required this.type}) : super(isSensor: true);
+
+  final ContactType type;
+}

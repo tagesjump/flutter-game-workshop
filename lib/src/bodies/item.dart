@@ -14,4 +14,26 @@ enum ItemType {
 
 /// Компонент предмета
 /// При взаимодействии с предметом игрок может его "подобрать", он сохранится у него в инвентаре
-// TODO: class Item
+class Item extends BaseBody {
+  Item({required super.position, required this.size, required this.type})
+      : super(
+          size: size,
+          bodyType: BodyType.kinematic,
+        );
+
+  final Vector2 size;
+  final ItemType type;
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+
+    add(SpriteComponent(
+      sprite: switch (type) {
+        ItemType.diamond => game.sprites.getTileMapSprite(7, 3),
+        ItemType.key => game.sprites.getTileMapSprite(7, 1),
+      },
+      size: size,
+    ));
+  }
+}
